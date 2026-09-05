@@ -16,9 +16,13 @@ export interface Block {
   scheduled_end: string;
   duration: number;
   departments_involved: string[];
-  status: 'PENDING_START' | 'ACTIVE' | 'EXTENSION_REQUESTED' | 'CLEARED_EARLY' | 'COMPLETED';
+  status: 'PENDING_START' | 'ACTIVE' | 'EXTENSION_REQUESTED' | 'CLEARED_EARLY' | 'COMPLETED' | 'APPROVED' | 'OVERRIDDEN';
   priority: string;
   consolidated_tasks: Task[];
+  decision?: 'approved' | 'rejected' | null;
+  decision_reason?: string | null;
+  decision_time?: string;
+  operator_role?: string;
 }
 
 export interface Train {
@@ -33,7 +37,7 @@ export interface Train {
 
 export interface Alert {
   id: string;
-  type: 'WARNING' | 'TRAIN IMPACT' | 'EARLY HANDOVER' | 'CONFLICT';
+  type: 'WARNING' | 'TRAIN IMPACT' | 'EARLY HANDOVER' | 'CONFLICT' | 'RESOLVED';
   severity: 'high' | 'medium' | 'low';
   title: string;
   message: string;
@@ -57,4 +61,36 @@ export interface SimulationResult {
   regulated_freight_trains: number;
   punctuality_impact_pct: number;
   conflict_warnings: string[];
+  delta_minutes?: number;
 }
+
+export interface TelemetryEvent {
+  id: string;
+  timestamp: string;
+  section: string;
+  type: string;
+  status: string;
+  detail: string;
+  badge_color: 'blue' | 'yellow' | 'green' | 'red' | string;
+}
+
+export interface BlockDecisionRequest {
+  decision: 'approved' | 'rejected';
+  reason?: string;
+  operator_role?: string;
+}
+
+export interface BlockDecisionResponse {
+  message: string;
+  block: Block;
+}
+
+export interface DashboardData {
+  kpis: KPI[];
+  blocks: Block[];
+  alerts: Alert[];
+  trains: Train[];
+  corridors: string[];
+  view_mode?: string;
+}
+
