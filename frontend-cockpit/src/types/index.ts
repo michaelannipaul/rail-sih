@@ -94,3 +94,60 @@ export interface DashboardData {
   view_mode?: string;
 }
 
+export interface RawTMSDefect {
+  ticket_id: string;
+  track_id: string;
+  km_start: number | string;
+  km_end: number | string;
+  defect_class: string;
+  date_detected: string;
+  speed_restriction_applied: boolean;
+}
+
+export interface RawSMMSFault {
+  fault_id: string;
+  station_code: string;
+  gear_type: string;
+  failure_category: string;
+  reported_ts: string;
+  urgency_code: string;
+}
+
+export interface RawTDMSDefect {
+  defect_no: string;
+  ohe_substation: string;
+  mast_from: string;
+  mast_to: string;
+  issue_type: string;
+  scheduled_date: string;
+}
+
+export interface MockDataResponse {
+  TMS_Engineering: RawTMSDefect[];
+  SMMS_Signal_Telecom: RawSMMSFault[];
+  TDMS_Traction: RawTDMSDefect[];
+}
+
+export interface UnifiedMaintenanceTask {
+  id: string;
+  department: 'ENGINEERING' | 'SIGNAL_TELECOM' | 'TRACTION' | string;
+  section_id: string;
+  start_km: number;
+  end_km: number;
+  base_severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | string;
+  estimated_duration_minutes: number;
+  due_date: string;
+  requires_power_block: boolean;
+  requires_traffic_block: boolean;
+}
+
+export interface WeatherAssessmentResult {
+  viable: boolean;
+  risk_multiplier: number;
+  warning_reasons: string[];
+  mapped_location: {
+    lat: number;
+    lon: number;
+  };
+}
+

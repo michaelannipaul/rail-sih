@@ -1,4 +1,15 @@
-import { DashboardData, SimulationResult, BlockDecisionResponse, TelemetryEvent } from '../types';
+import { 
+  DashboardData, 
+  SimulationResult, 
+  BlockDecisionResponse, 
+  TelemetryEvent,
+  MockDataResponse,
+  RawTMSDefect,
+  RawSMMSFault,
+  RawTDMSDefect,
+  UnifiedMaintenanceTask,
+  WeatherAssessmentResult
+} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
@@ -40,6 +51,33 @@ export const simulationService = {
 
   getTelemetry: (): Promise<TelemetryEvent[]> => 
     request<TelemetryEvent[]>('/api/telemetry'),
+
+  getMockData: (): Promise<MockDataResponse> =>
+    request<MockDataResponse>('/api/mock-data'),
+
+  normalizeTMS: (defect: RawTMSDefect): Promise<UnifiedMaintenanceTask> =>
+    request<UnifiedMaintenanceTask>('/api/normalize/tms', {
+      method: 'POST',
+      body: JSON.stringify(defect),
+    }),
+
+  normalizeSMMS: (fault: RawSMMSFault): Promise<UnifiedMaintenanceTask> =>
+    request<UnifiedMaintenanceTask>('/api/normalize/smms', {
+      method: 'POST',
+      body: JSON.stringify(fault),
+    }),
+
+  normalizeTDMS: (defect: RawTDMSDefect): Promise<UnifiedMaintenanceTask> =>
+    request<UnifiedMaintenanceTask>('/api/normalize/tdms', {
+      method: 'POST',
+      body: JSON.stringify(defect),
+    }),
+
+  assessWeatherRisk: (task: UnifiedMaintenanceTask): Promise<WeatherAssessmentResult> =>
+    request<WeatherAssessmentResult>('/api/normalize/weather-risk', {
+      method: 'POST',
+      body: JSON.stringify(task),
+    }),
 
   downloadPlanExport: () => {
     const url = `${API_BASE_URL}/api/plan/export`;

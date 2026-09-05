@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   AlertTriangle, CheckCircle, 
   Activity, ArrowUpRight, ArrowDownRight, AlertOctagon,
-  ThumbsDown, Check, FileDown, Filter, Zap, Radio, Loader2
+  ThumbsDown, Check, FileDown, Filter, Zap, Radio, Loader2, Layers
 } from 'lucide-react';
 import { KPI, Block, Alert, Train, SimulationResult, TelemetryEvent } from './types';
 import { mockKPIs, mockBlocks, mockAlerts, mockTrains, mockCorridors } from './data/mock';
 import { simulationService } from './services/simulationService';
+import { NormalizationLab } from './components/NormalizationLab';
 
 // Reusable Components
 const Card = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
@@ -459,6 +460,7 @@ const BlockModal = ({
 };
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState<'cockpit' | 'lab'>('cockpit');
   const [kpis, setKpis] = useState(mockKPIs);
   const [blocks, setBlocks] = useState(mockBlocks);
   const [alerts, setAlerts] = useState(mockAlerts);
@@ -538,50 +540,80 @@ export default function App() {
     <div className="min-h-screen bg-gray-950 text-gray-300 font-sans flex flex-col">
       {/* Header */}
       <header className="bg-gray-900 border-b border-gray-800 h-16 flex items-center justify-between px-6 shrink-0 sticky top-0 z-40">
-        <div className="flex items-center gap-4">
-          <div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/20">
-            RS
+        <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/20">
+              RS
+            </div>
+            <h1 className="text-xl font-bold text-white tracking-tight flex items-center">
+              RailSync <span className="text-gray-500 font-normal mx-2">|</span> 
+              <span className="text-indigo-400 font-medium text-sm">AI Operations</span>
+            </h1>
           </div>
-          <h1 className="text-xl font-bold text-white tracking-tight flex items-center">
-            RailSync <span className="text-gray-500 font-normal mx-2">|</span> 
-            <span className="text-indigo-400 font-medium text-sm">Dispatcher Cockpit</span>
-          </h1>
+
+          {/* Navigation Tabs */}
+          <nav className="flex items-center bg-gray-800/90 p-1 rounded-lg border border-gray-700">
+            <button
+              onClick={() => setActiveTab('cockpit')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded transition flex items-center gap-1.5 ${
+                activeTab === 'cockpit'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <Activity size={13} /> Corridor Cockpit
+            </button>
+            <button
+              onClick={() => setActiveTab('lab')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded transition flex items-center gap-1.5 ${
+                activeTab === 'lab'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <Layers size={13} /> AI Ingestion & Normalization
+            </button>
+          </nav>
         </div>
         
-        <div className="flex items-center gap-6">
-          {/* View Mode Toggle */}
-          <div className="flex bg-gray-800 p-1 rounded-lg border border-gray-700">
-            <button 
-              onClick={() => setViewMode('Siloed')}
-              className={`px-3 py-1.5 text-xs font-medium rounded transition ${viewMode === 'Siloed' ? 'bg-gray-700 text-white shadow' : 'text-gray-400 hover:text-gray-200'}`}
-            >
-              Manual/Siloed Plan
-            </button>
-            <button 
-              onClick={() => setViewMode('Optimized')}
-              className={`px-3 py-1.5 text-xs font-medium rounded flex items-center gap-1 transition ${viewMode === 'Optimized' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-gray-200'}`}
-            >
-              <Zap size={12} /> AI Optimized
-            </button>
-          </div>
+        <div className="flex items-center gap-5">
+          {activeTab === 'cockpit' && (
+            <>
+              {/* View Mode Toggle */}
+              <div className="flex bg-gray-800 p-1 rounded-lg border border-gray-700">
+                <button 
+                  onClick={() => setViewMode('Siloed')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded transition ${viewMode === 'Siloed' ? 'bg-gray-700 text-white shadow' : 'text-gray-400 hover:text-gray-200'}`}
+                >
+                  Manual/Siloed Plan
+                </button>
+                <button 
+                  onClick={() => setViewMode('Optimized')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded flex items-center gap-1 transition ${viewMode === 'Optimized' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-gray-200'}`}
+                >
+                  <Zap size={12} /> AI Optimized
+                </button>
+              </div>
 
-          {/* Role Selector */}
-          <div className="flex items-center gap-2">
-            <Filter size={14} className="text-gray-400" />
-            <select 
-              value={role} 
-              onChange={(e) => setRole(e.target.value as any)}
-              className="bg-gray-800 border border-gray-700 text-sm text-gray-200 rounded px-2 py-1 outline-none focus:border-indigo-500 cursor-pointer"
-            >
-              <option value="All">All Departments</option>
-              <option value="Engineering">Engineering Planner</option>
-              <option value="Signal & Telecom">S&T Planner</option>
-              <option value="Electrical">TRD Planner</option>
-              <option value="COA">COA Controller</option>
-            </select>
-          </div>
+              {/* Role Selector */}
+              <div className="flex items-center gap-2">
+                <Filter size={14} className="text-gray-400" />
+                <select 
+                  value={role} 
+                  onChange={(e) => setRole(e.target.value as any)}
+                  className="bg-gray-800 border border-gray-700 text-sm text-gray-200 rounded px-2 py-1 outline-none focus:border-indigo-500 cursor-pointer"
+                >
+                  <option value="All">All Departments</option>
+                  <option value="Engineering">Engineering Planner</option>
+                  <option value="Signal & Telecom">S&T Planner</option>
+                  <option value="Electrical">TRD Planner</option>
+                  <option value="COA">COA Controller</option>
+                </select>
+              </div>
 
-          <div className="h-6 border-l border-gray-700"></div>
+              <div className="h-6 border-l border-gray-700"></div>
+            </>
+          )}
 
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)] ${apiStatus === 'offline' ? 'bg-yellow-500' : 'bg-green-500 animate-pulse'}`}></div>
@@ -590,50 +622,56 @@ export default function App() {
             </span>
           </div>
           
-          <button 
-            onClick={() => simulationService.downloadPlanExport()}
-            className="flex items-center gap-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/30 px-3 py-1.5 rounded transition shadow-sm"
-            title="Download Master Tactical Maintenance & Corridor Schedule (CSV)"
-          >
-            <FileDown size={14} /> Export Plan
-          </button>
+          {activeTab === 'cockpit' && (
+            <button 
+              onClick={() => simulationService.downloadPlanExport()}
+              className="flex items-center gap-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/30 px-3 py-1.5 rounded transition shadow-sm"
+              title="Download Master Tactical Maintenance & Corridor Schedule (CSV)"
+            >
+              <FileDown size={14} /> Export Plan
+            </button>
+          )}
         </div>
       </header>
 
-      {/* Main Dashboard */}
-      <main className="flex-1 p-6 flex flex-col overflow-y-auto">
-        {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {kpis.map(kpi => <KPICard key={kpi.id} kpi={kpi} />)}
-        </div>
+      {/* Main View */}
+      {activeTab === 'cockpit' ? (
+        <main className="flex-1 p-6 flex flex-col overflow-y-auto">
+          {/* KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {kpis.map(kpi => <KPICard key={kpi.id} kpi={kpi} />)}
+          </div>
 
-        {/* View mode warning banner */}
-        {viewMode === 'Siloed' && (
-          <div className="mt-6 bg-red-900/30 border border-red-500/50 text-red-200 p-3 rounded-lg flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertTriangle size={18} className="text-red-400" />
-              <span className="text-sm font-medium">Viewing Manual/Siloed Plan from AI Backend. Uncoordinated multi-department demands increase network downtime.</span>
+          {/* View mode warning banner */}
+          {viewMode === 'Siloed' && (
+            <div className="mt-6 bg-red-900/30 border border-red-500/50 text-red-200 p-3 rounded-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle size={18} className="text-red-400" />
+                <span className="text-sm font-medium">Viewing Manual/Siloed Plan from AI Backend. Uncoordinated multi-department demands increase network downtime.</span>
+              </div>
+              <div className="text-xs font-bold px-2 py-1 bg-red-800 rounded">18.5 hrs excess block time required</div>
             </div>
-            <div className="text-xs font-bold px-2 py-1 bg-red-800 rounded">18.5 hrs excess block time required</div>
-          </div>
-        )}
+          )}
 
-        {/* Master Timeline */}
-        <Timeline blocks={displayBlocks} corridors={corridors} onBlockClick={setSelectedBlock} />
+          {/* Master Timeline */}
+          <Timeline blocks={displayBlocks} corridors={corridors} onBlockClick={setSelectedBlock} />
 
-        {/* Lower Panels */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 min-h-[340px]">
-          <div className="lg:col-span-1">
-            <AlertsPanel alerts={alerts} />
+          {/* Lower Panels */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 min-h-[340px]">
+            <div className="lg:col-span-1">
+              <AlertsPanel alerts={alerts} />
+            </div>
+            <div className="lg:col-span-1">
+              <TrainsPanel trains={trains} />
+            </div>
+            <div className="lg:col-span-1">
+              <TelemetryPanel telemetry={telemetry} loading={telemetryLoading} />
+            </div>
           </div>
-          <div className="lg:col-span-1">
-            <TrainsPanel trains={trains} />
-          </div>
-          <div className="lg:col-span-1">
-            <TelemetryPanel telemetry={telemetry} loading={telemetryLoading} />
-          </div>
-        </div>
-      </main>
+        </main>
+      ) : (
+        <NormalizationLab />
+      )}
 
       {/* Block Details Modal */}
       {selectedBlock && (
